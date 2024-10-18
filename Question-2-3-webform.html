@@ -127,6 +127,7 @@
                 // If the form is valid, show success message
                 if (isFormValid) {
                     alert('All inputs are valid.');
+                    $('#error_summary').hide(); // Hide error summary when form is valid
                 } else {
                     // Show the error summary and set focus
                     $('#error_summary').show();
@@ -134,9 +135,26 @@
                 }
             }
 
+            // Function to clear error messages as the user interacts with fields
+            function clearError(input) {
+                var $error = $('#' + input + '_error');
+                if ($error.is(':visible')) {
+                    $error.hide();
+                    $('#error_messages').find('li:contains("' + $error.text() + '")').remove(); // Remove from error summary
+                }
+            }
+
             $(document).ready(function () {
                 // Validate form on submit
                 $('#feedbackForm').on('submit', validateForm);
+
+                // Clear error messages on input change
+                $('#name').on('input', function () {
+                    clearError('name');
+                });
+                $('input[name="gender"]').on('change', function () {
+                    clearError('gender');
+                });
             });
         })();
     </script>
