@@ -25,16 +25,21 @@
         fieldset ul {
             margin: 0;
         }
+
+        .error-list {
+            margin-top: 10px;
+            border: 1px solid red;
+            padding: 10px;
+            background-color: #f8d7da; /* Light red background for errors */
+        }
     </style>
 </head>
 <body>
     <h1>Feedback form</h1>
     <form id="feedbackForm">
-        <!-- Updated label to include 'for' attribute, added aria-required -->
         <div class="control">
             <label for="name">Full name <span class="required">*</span></label>
             <input id="name" name="name" type="text" aria-required="true" aria-describedby="name_error"/>
-            <!-- Inline error message for screen readers -->
             <div id="name_error" class="error" aria-live="polite" style="display: none;">Please enter your full name.</div>
         </div>
 
@@ -44,7 +49,6 @@
             <span id="biography_help">Include examples of your skills in JavaScript.</span>
         </div>
 
-        <!-- Grouped gender inputs using fieldset and legend for screen readers -->
         <fieldset class="control">
             <legend>Gender <span class="required">*</span></legend>
             <div>
@@ -55,11 +59,9 @@
                 <input id="gender_female" name="gender" type="radio" value="female" aria-required="true"/>
                 <label for="gender_female">Female</label>
             </div>
-            <!-- Error message for gender selection -->
             <div id="gender_error" class="error" aria-live="polite" style="display: none;">Please select your gender.</div>
         </fieldset>
 
-        <!-- Updated label to include 'for' attribute -->
         <div class="control">
             <input id="accept_agbs" name="accept_agbs" type="checkbox" value="1"/>
             <label for="accept_agbs">I accept the terms and conditions</label>
@@ -68,6 +70,12 @@
         <div class="control">
             <input type="submit" value="Register"/>
         </div>
+
+        <!-- Error summary area for screen readers -->
+        <div id="error_summary" class="error-list" aria-live="assertive" style="display: none;">
+            <h2>Errors:</h2>
+            <ul id="error_messages"></ul>
+        </div>
     </form>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -75,9 +83,9 @@
         "use strict";
 
         (function () {
-            function validateInput(input, errorMessageId) {
+            function validateInput(input) {
                 var $input = $('[name="' + input + '"]');
-                var $error = $('#' + errorMessageId);
+                var $error = $('#' + input + '_error');
                 var isValid = true;
 
                 if (input === 'gender') {
@@ -102,15 +110,27 @@
             }
 
             function validateForm(event) {
-                event.preventDefault();
+                event.preventDefault(); // Prevent form submission to validate
                 var isFormValid = true;
+                $('#error_messages').empty(); // Clear previous error messages
 
                 // Validate each field
-                isFormValid &= validateInput('name', 'name_error');
-                isFormValid &= validateInput('gender', 'gender_error');
+                if (!validateInput('name')) {
+                    isFormValid = false;
+                    $('#error_messages').append('<li>' + $('#name_error').text() + '</li>'); // Add to error summary
+                }
+                if (!validateInput('gender')) {
+                    isFormValid = false;
+                    $('#error_messages').append('<li>' + $('#gender_error').text() + '</li>'); // Add to error summary
+                }
 
+                // If the form is valid, show success message
                 if (isFormValid) {
                     alert('All inputs are valid.');
+                } else {
+                    // Show the error summary and set focus
+                    $('#error_summary').show();
+                    $('#error_summary').focus(); // Move focus to the error summary
                 }
             }
 
